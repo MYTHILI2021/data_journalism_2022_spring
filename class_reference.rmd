@@ -36,5 +36,8 @@ install.packages("tidyverse")
 ```{r}
 library(tidyverse)
 ```
-
+## Command to change datatype
+ column name = as.data type(column name)
+ Ex: id=as.character(id)
+##Run the following codeblock to find the largest and smallest loans in the data, by using summarise() without grouping.
 
