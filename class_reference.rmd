@@ -41,3 +41,24 @@ library(tidyverse)
  Ex: id=as.character(id)
 ##Run the following codeblock to find the largest and smallest loans in the data, by using summarise() without grouping.
 
+## 
+rename() command is part of tidyverse and not janitor.
+janitor commands:
+clean_names() command cleans up the names
+glimpse() shows the columns and datatypes
+distinct() will get rid of duplicate records
+get_dupes() will display the duplicated data
+str_sub() will create a substring that can restrict the size of the values. It's used along mutate function.
+str_to_title() will make values titlecase (not lower or upper)
+city== "smth", "smthh"
+TRUE~city -- true for all city values except for smth smth.
+
+## Follow the format of:
+filter()
+mutate()
+group_by()
+summarize()
+arrange()
+
+## use filter(str_detect(column_name, "name | name")) to filter out specific values
+## bind_rows(list(datasetname,datasetname, datasetname)) is used to combine diff datasets to form a single one with data from all 3 datasets.
