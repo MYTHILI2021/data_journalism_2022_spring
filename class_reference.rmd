@@ -62,3 +62,4 @@ arrange()
 
 ## use filter(str_detect(column_name, "name | name")) to filter out specific values
 ## bind_rows(list(datasetname,datasetname, datasetname)) is used to combine diff datasets to form a single one with data from all 3 datasets.
+## left_join() adds a separate data set to the main data set. 
