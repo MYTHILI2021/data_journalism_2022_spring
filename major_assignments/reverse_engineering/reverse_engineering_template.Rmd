@@ -1,6 +1,6 @@
 ---
 title: "Reverse Engineering Project"
-author: "Student names here"
+author: "Mythili Devarakonda, Varun Shanker, Jon Donville"
 date: "Date here"
 output:
   html_document:
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction 
 
-In this notebook, we are reverse engineering the story, [STORY NAME](STORY URL)
+In this notebook, we are reverse engineering the story, [CEOs gave heavily during legislative session, exposing loophole in NC's fundraising ban (WRAL, North Carolina)](https://www.wral.com/in-session-campaign-donations/17716104/)
 
 ## Load libraries
 
