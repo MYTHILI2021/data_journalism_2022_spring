@@ -27,6 +27,8 @@ Loading required libraries for this analysis.
 ```{r echo=FALSE, message=FALSE}
 library(tidyverse)
 library(janitor)
+library(lubridate)
+library(refinr)
 
 ```
 
@@ -41,9 +43,9 @@ In this section, describe the source of the data, write a basic data dictionary 
 
 # Clean required data and prepare for analysis if needed. 
 
-Donors_list<- read_csv("data/donors0103-0701.csv")
+nc_finance_data <- read_csv("data/donors0103-0701.csv")
 
-View(Donors_list)
+View(nc_finance_data)
 
 
 ```
@@ -53,18 +55,25 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: “Gov. Roy Cooper's main campaign account brought in another $407,000 during session.”
-* **Analysis summary**: I tried filtering the data set using his main campaign account "Cooper for North Carolina" but the amount didn't match with the article's result.
+* **Sentence text**: “Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped $3.4 million. Gov. Roy Cooper's main campaign account brought in another $407,000 during session."
+* **Analysis summary**: I calculated the donations to the two main political parties and the amount exceeded $3.4 million -- the total amount is $4,646,369 without even counting what the large fundraising vehicles brought in. 
 
 ```{r}
 # Put code to reverse engineer sentence here
 
 # Display results of code below this codeblock
 
-Donors_list <- Donors_list %>% 
+nc_finance_data <- nc_finance_data %>% 
   mutate(amount = as.numeric(parse_number(amount)))
 
-Donors_list %>% filter(name == "Cooper For North Carolina")
+major_donations<- nc_finance_data %>% filter(
+            committee_name == 'NC DEC - STATE' |
+            committee_name == 'NC REC - STATE'
+) 
+
+major_donations %>% summarise(
+  total_amount=sum(amount)
+)
   
 
 ```
@@ -73,29 +82,25 @@ Donors_list %>% filter(name == "Cooper For North Carolina")
 
 * **Sentence text**: “Berger, R-Rockingham, brought in about $60,000 that week. House Speaker Tim Moore's campaign account collected more than $72,000. Both men declined interview requests on these issues.”
 
-* **Analysis summary**: * **Analysis summary**: I tried to confirm the values found here but ran into a couple of issues. The first was the time-frame, which I think is 1/3 to 1/10 but I'm not sure. The second is knowing where all the donations are going, it's hard to see if I'm catching all of Berger/Moore's donations.
+* **Analysis summary**: I was able to recreate both these values by using the right date frame and date format.
 
 
 ```{r}
 # Put code to reverse engineer sentence here
-berger_donations <- Donors_list %>%  
-  filter(date >= "0001-03-18" & date <= "0001-10-18" & committee_name == "PHILIP E BERGER COMM") 
+nc_finance_data <- nc_finance_data %>% mutate(date = mdy(date)) 
+
+berger_donations <- nc_finance_data %>%  
+  filter(date >= '2018-05-09' & date <= '2018-05-16' & committee_name == "PHILIP E BERGER COMM") 
 berger_donations %>% 
-summarize(
-      total_loans_amount = sum(amount)
-) 
+summarize(total_loans_amount = sum(amount))
+moore_donations <- nc_finance_data %>%  
+  filter(date >= '2018-05-09' & date <= '2018-05-16' & committee_name == "FRIENDS OF TIM MOORE") 
+moore_donations %>% 
+summarize(total_loans_amount = sum(amount))
   # Display results of code below this codeblock
 ```
 
-```{r}
-moore_donations <- Donors_list %>%  
-  filter(date >= "0001-03-18" & date <= "0001-10-18" & committee_name == "FRIENDS OF TIM MOORE") 
-moore_donations %>% 
-summarize(
-      total_loans_amount = sum(amount)
-) 
 
-```
 
 ### Sentence 3
 
