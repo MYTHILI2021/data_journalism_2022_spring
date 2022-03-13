@@ -56,7 +56,7 @@ In this notebook, we are reverse engineering five sentences from the story.
 ### Sentence 1
 
 * **Sentence text**: “Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped $3.4 million. Gov. Roy Cooper's main campaign account brought in another $407,000 during session."
-* **Analysis summary**: I calculated the donations to the two main political parties and the amount exceeded $3.4 million -- the total amount is $4,646,369 without even counting what the large fundraising vehicles brought in. 
+* **Analysis summary**: I was able to get to the right result of $3.4 million by filtering using the date format and calculating the total amount.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -64,15 +64,14 @@ In this notebook, we are reverse engineering five sentences from the story.
 # Display results of code below this codeblock
 
 nc_finance_data <- nc_finance_data %>% 
-  mutate(amount = as.numeric(parse_number(amount)))
+  mutate(date = mdy(date))  
+nc_finance_data <- nc_finance_data %>% mutate(amount = as.numeric(parse_number(amount)))
 
-major_donations<- nc_finance_data %>% filter(
-            committee_name == 'NC DEC - STATE' |
-            committee_name == 'NC REC - STATE'
-) 
+major_donations<-nc_finance_data %>% filter( date >= '2018-05-16' & date <= '2018-06-29' )
+
 
 major_donations %>% summarise(
-  total_amount=sum(amount)
+  total_amount = sum(amount)
 )
   
 
