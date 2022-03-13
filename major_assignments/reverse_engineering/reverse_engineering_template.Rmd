@@ -108,7 +108,7 @@ summarize(total_loans_amount = sum(amount))
 
 ```{r}
 # Put code to reverse engineer sentence here
-Donors_list %>% 
+nc_finance_data %>% 
   group_by(name-clean) %>% 
 arrange(desc(amount))
 # Display results of code below this codeblock
