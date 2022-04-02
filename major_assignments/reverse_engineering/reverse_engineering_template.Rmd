@@ -1,6 +1,6 @@
 ---
 title: "Reverse Engineering Project"
-author: "Mythili Devarakonda, Varun Shanker, Jon Donville"
+author: "Mythili Devarakonda, Varun Shankar, Jon Donville"
 date: "3/5/2022"
 output:
   html_document:
@@ -36,12 +36,11 @@ library(refinr)
 
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
+
+This data comes from campaign finance data. The main sections we focused on were name-clean (Name of donater), committee-name (who the money was for), amount (how much the donation was for). We had to do some mild cleaning of the data with the names and then changed the format of the date to be better served.
+
 ```{r}
-# Load required data
-
-# Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
-
-# Clean required data and prepare for analysis if needed. 
+# Loaded required data by reading csv file
 
 nc_finance_data <- read_csv("data/donors0103-0701.csv")
 
@@ -55,21 +54,23 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: “Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped $3.4 million. Gov. Roy Cooper's main campaign account brought in another $407,000 during session."
-* **Analysis summary**: I was able to get to the right result of $3.4 million by filtering using the date format and calculating the total amount.
+* **Sentence text**: “Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped $3.4 million. Gov. Roy Cooper's main campaign account brought in another $407,000 during session.”
+
+* **Analysis summary**:I modified the date column's type. I filtered using that new date format and calculated the total amount, and then summarized it to get the right result of $3.4 million
 
 ```{r}
 # Put code to reverse engineer sentence here
 
-# Display results of code below this codeblock
-
+# Cleaning the date column and modifying the amount column's datatype from character to number
 nc_finance_data <- nc_finance_data %>% 
   mutate(date = mdy(date))  
 nc_finance_data <- nc_finance_data %>% mutate(amount = as.numeric(parse_number(amount)))
 
+# Filtering the dates between May and June 2018 
+
 major_donations<-nc_finance_data %>% filter( date >= '2018-05-16' & date <= '2018-06-29' )
 
-
+# Summarizing the total amount in the above date range
 major_donations %>% summarise(
   total_amount = sum(amount)
 )
@@ -81,21 +82,32 @@ major_donations %>% summarise(
 
 * **Sentence text**: “Berger, R-Rockingham, brought in about $60,000 that week. House Speaker Tim Moore's campaign account collected more than $72,000. Both men declined interview requests on these issues.”
 
-* **Analysis summary**: I was able to recreate both these values by using the right date frame and date format.
+* **Analysis summary**:After using the changed date format, I filtered between 5/9 and 5/16 (the week before the session started) and filtered for Berger and Moore's committee names to find the correct amounts they were given in that time frame.
 
 
 ```{r}
 # Put code to reverse engineer sentence here
-nc_finance_data <- nc_finance_data %>% mutate(date = mdy(date)) 
+
+# Filtering Berger donations by date and committee_name
 
 berger_donations <- nc_finance_data %>%  
   filter(date >= '2018-05-09' & date <= '2018-05-16' & committee_name == "PHILIP E BERGER COMM") 
+
+# Summarizing the total loan amount of Berger donations
+
 berger_donations %>% 
 summarize(total_loans_amount = sum(amount))
+
+#Filtering Moore donations by date and committee_name
+
 moore_donations <- nc_finance_data %>%  
   filter(date >= '2018-05-09' & date <= '2018-05-16' & committee_name == "FRIENDS OF TIM MOORE") 
+
+#Summarizing the total loan amount of Moore donations
+
 moore_donations %>% 
 summarize(total_loans_amount = sum(amount))
+
   # Display results of code below this codeblock
 ```
 
@@ -103,67 +115,125 @@ summarize(total_loans_amount = sum(amount))
 
 ### Sentence 3
 
-* **Sentence text**: R.H. Barringer's board chair, Jasie Barringer, donated another $8,200 in-session, and Teresa Craig kicked in another $5,200 to Berger. The North Carolina Beer & Wine Wholesalers Association PAC gave $18,400 during the week before session and on opening day.
-* **Analysis summary**: The problem with the data right now is that the amount row is not a number. The datatype will need to be changed before getting any accurate data. I could filter for those names specifically, but it would make it difficult to produce any meaningful observations other than exactly what I am looking for. 
+* **Sentence text**: “R.H. Barringer's board chair, Jasie Barringer, donated another $8,200 in-session, and Teresa Craig kicked in another $5,200 to Berger. The North Carolina Beer & Wine Wholesalers Association PAC gave $18,400 during the week before session and on opening day.”
+
+* **Analysis summary**: I filtered by date and by name for each donation. I did each one in their own data frame to keep it as clear as possible. My results matched the article's findings.
 
 ```{r}
 # Put code to reverse engineer sentence here
-nc_finance_data %>% 
-  group_by(name-clean) %>% 
-arrange(desc(amount))
-# Display results of code below this codeblock
+
+#Read cleaned csv file
+nc_finance_data_cleaned <- read.csv("data/nc_finance_data_cleaned.csv") 
+
+# Clean it to change the datatype of the amount column
+nc_finance_data_cleaned <- nc_finance_data_cleaned %>%  mutate(amount = as.numeric(parse_number(amount)))
+
+# Filtering for Barringer loans by name
+barringer_donations<-nc_finance_data_cleaned %>% 
+  filter(str_detect(name_clean, "BARRINGER")) 
+
+# Filtering for Barringer loans by date
+barringer_donations_newdates <- barringer_donations %>% mutate(date = mdy(date)) %>% 
+  filter(date >= '2018-05-16' & date <= '2018-06-29')
+
+# Filtering for Craig loans by name
+
+craig_donations <- nc_finance_data_cleaned %>%  
+  filter(str_detect(name_clean, "TERESA S CRAIG"))
+
+# Filtering for Craig loans by date
+craig_donations_newdates <- craig_donations %>% mutate(date = mdy(date)) %>% 
+  filter(date >= '2018-05-16' & date <= '2018-06-29')
+
+#Filtering for beer and wine donations by name
+beer_andwine_donations <- nc_finance_data_cleaned %>% 
+  filter(str_detect(name_clean, "BEER & WINE"))
+
+#Filter for beer and wine donations by date
+beer_andwine_newdates <- beer_andwine_donations %>% mutate(date = mdy(date)) %>% 
+  filter(date >= '2018-05-09' & date <= '2018-05-16') 
+
+# Summarizing each donation to find total amount
+
+beer_andwine_newdates %>% 
+  summarise(
+  total_amount = sum(amount))
+
+craig_donations_newdates %>% 
+  summarise(
+  total_amount = sum(amount))
+
+barringer_donations_newdates %>% 
+  summarise(
+  total_amount = sum(amount))
 ```
 
 ### Sentence 4
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text** : “Senate President Pro Tem Phil Berger's campaign alone raised nearly $222,000 during session. Twenty-three people gave him the maximum allowed: $5,200.”
+
+* **Analysis summary**: By filtering by the date and committee name and then summarizing the total amount of donations, I was able to confirm Berger got just under 222k in donations during the session. 
+I then did the same but also added another filter requirement, that the amount donated was the maximum allowed of 5200, and I got 23 results, confirming what the story said.
 
 ```{r}
 # Put code to reverse engineer sentence here
-# Display results of code below this codeblock
+
+#Filtering by name and committee_name for Berger donations
+
+berger_donations <- nc_finance_data %>%  
+  filter(date >= '2018-05-16' & date <= '2018-06-29' & committee_name == "PHILIP E BERGER COMM") 
+
+#Summarizing the total loan amount
+berger_donations %>% 
+summarize(total_loans_amount = sum(amount))
+
+#Filtering for the maximum allowed donations
+
+berger_max_donations <- nc_finance_data %>%  
+  filter(date >= '2018-05-16' & date <= '2018-06-29' & committee_name == "PHILIP E BERGER COMM" & amount == 5200) 
+
+#Displaying the maximum allowed Berger donations
+berger_max_donations
+
 ```
+
 
 ### Sentence 5
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: "The co-chief executives at a Georgia firm that brokers tax credits put $41,000 into the campaign accounts of North Carolina General Assembly members during the last regular legislative session."
 
-```{r}
-# Put code to reverse engineer sentence here
-# Display results of code below this codeblock
-```
-
--30-
+* **Analysis summary**: My analysis showed that during the session from May 16 to June 29, the two executives gave a combined $41,250. I am not sure if the authors of the article rounded their results for readability, but I had the total about 250 dollars different than the article. It also seems that the article made a mistake in saying that they donated these figures during the last REGULAR legislative session. According to ballotpedia (https://ballotpedia.org/2018_North_Carolina_legislative_session), the last regular session at the time of the article went from January 10 - July 4. The two executives donated significantly more than 41k during that time.
 
 ```{r}
 # Put code to reverse engineer sentence here
 
-# Display results of code below this codeblock
+# Filter for Delmer donations, by date, name, and make sure the donations were given to candidates
 
-```
+delmer_donations<-nc_finance_data_cleaned %>% 
+  mutate(date = mdy(date)) %>% 
+  filter(date >= '2018-05-16' & date <= '2018-06-29') %>% 
+  filter(str_detect(cleaned_name, "Delmer")) %>% 
+  filter(str_detect(source, "candidates")) %>% 
+  filter(str_detect(transaction_type, "Individual"))
 
-### Sentence 4
+# Filter for Strobel donations, by date, name, and make sure the donations were given to candidates
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+strobel_donations<-nc_finance_data_cleaned %>% 
+  mutate(date = mdy(date)) %>% 
+  filter(date >= '2018-05-16' & date <= '2018-06-29') %>% 
+  filter(str_detect(cleaned_name, "Strobel")) %>% 
+  filter(str_detect(source, "candidates")) %>% 
+  filter(str_detect(transaction_type, "Individual"))
+  
+# Summarize and display donations for Delmer and Strobel
 
-```{r}
-# Put code to reverse engineer sentence here
+delmer_donations %>% 
+  summarise(
+  total_amount = sum(amount))
 
-# Display results of code below this codeblock
-
-```
-
-### Sentence 5
-
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
-
-```{r}
-# Put code to reverse engineer sentence here
-
-# Display results of code below this codeblock
+strobel_donations %>% 
+  summarise(
+  total_amount = sum(amount))
 
 ```
 
