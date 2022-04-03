@@ -37,7 +37,7 @@ library(refinr)
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
 
-This data comes from campaign finance data. The main sections we focused on were name-clean (Name of donater), committee-name (who the money was for), amount (how much the donation was for). We had to do some mild cleaning of the data with the names and then changed the format of the date to be better served.
+This data comes from campaign finance data. The main sections we focused on were name-clean (Name of donor), committee-name (who the money was for), amount (how much the donation was for). We had to do some mild cleaning of the data with the names and then changed the format of the date to be better served.
 
 ```{r}
 # Loaded required data by reading csv file
