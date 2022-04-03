@@ -54,9 +54,9 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: “Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped $3.4 million. Gov. Roy Cooper's main campaign account brought in another $407,000 during session.”
+* **Sentence text**: “Add in donations to the two main political parties and to a handful of other large fundraising vehicles for state legislative races, and the in-session giving topped $3.4 million.”
 
-* **Analysis summary**:I modified the date column's type. I filtered using that new date format and calculated the total amount, and then summarized it to get the right result of $3.4 million
+* **Analysis summary**:I modified the date column's type. I filtered using that new date format and calculated the total amount, and then summarized it to get the right result of $3.4 million.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -227,13 +227,19 @@ strobel_donations<-nc_finance_data_cleaned %>%
   
 # Summarize and display donations for Delmer and Strobel
 
-delmer_donations %>% 
+delmer_total <- delmer_donations %>% 
   summarise(
   total_amount = sum(amount))
 
-strobel_donations %>% 
+strobel_total <- strobel_donations %>% 
   summarise(
   total_amount = sum(amount))
+
+# Adding Strobel and Delmer's donations for a combined value
+
+combined_total <- delmer_total + strobel_total
+
+
 
 ```
 
