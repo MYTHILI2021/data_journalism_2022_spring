@@ -125,3 +125,5 @@ marvel_data_lgbt_hair <- marvel_data_lgbt %>%
         
       )
   ) 
+
+```
