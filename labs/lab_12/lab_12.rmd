@@ -53,7 +53,9 @@ Then write code that will construct a paragraph about the data described above c
 
 Put your sentence in the answer below, along with one other question you could ask of this data.
 
-**A1.**
+**A1.** Sentence: Vehicle incident which occurred latest on April 19, 2022 has happened 9 times in the previous 30 days. 
+
+Question: During what times of the day is the incident frequenting at? 
 
 ```{r}
 crime_log <- read_csv("https://raw.githubusercontent.com/dwillis/wvu-projects/master/crime-log/crime_log.csv") %>% clean_names() %>% separate(datetime, c('date', 'time'), sep= " ") %>% mutate(date = mdy(date)) %>% 
@@ -61,8 +63,9 @@ crime_log <- read_csv("https://raw.githubusercontent.com/dwillis/wvu-projects/ma
 
 recent_crimelog <- head(crime_log)
 first_incident <- crime_log %>% slice(1)
-thirty_days <- crime_log %>% filter(date >= first_incident$date - 30)
 
+thirty_days <- crime_log %>% filter(date >= first_incident$date - 30) %>% 
+ filter(title == first_incident$title) 
 
 
 
