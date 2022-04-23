@@ -127,7 +127,7 @@ marvel_data_lgbt_hair <- marvel_data_lgbt %>%
   ) 
 
 ```
-Question 1: 
+Question 1: What percentage of LGBT comic characters get more than 1 appearance and average appearances?
 
 ```{r}
 lgbt_dc_characters_overoneapp <- dc_data_lgbt %>% 
@@ -148,7 +148,7 @@ lgbt_marvel_characters_overoneapp <- marvel_data_lgbt %>%
              
 ```
 
-Question 2: 
+Question 2: What's the alignment of LGBT comic characters?
 
 ```{r}
 dc_lgbt_heroes <- dc_data_lgbt_hair %>% 
@@ -163,7 +163,8 @@ marvellgbtcountgoodguy = count(marvel_lgbt_heroes)
   ((dclgbtcountgoodguy+marvellgbtcountgoodguy)/(marvellgbtcount+dclgbtcount))*100
 ```
 
-Question 3: What's the identity status of LGBT characters? 
+Question 3: What's the identity status of LGBT characters? (Here: Identity means secret or public or dual identity according to the data)
+
 
 ```{r}
 dc_lgbt_secret <- dc_data_lgbt %>% 
@@ -178,7 +179,7 @@ marvel_lgbt_secret_count = count(marvel_lgbt_secret)
  
   ((dc_lgbt_secret_count+marvel_lgbt_secret_count)/(marvel_lgbt_count+dc_lgbt_count))*100
 ```
-Question 4: 
+Question 4: What’s the death rate of LGBT comic characters ?
 
 ```{r}
 dc_lgbt_alive <- dc_data_lgbt_hair %>% 
@@ -189,3 +190,11 @@ dclgbtcountalive= count(dc_lgbt_alive)
 marvellgbtcountalive = count(marvel_lgbt_alive)
 ((dclgbtcountalive+marvellgbtcountalive)/(marvellgbtcount+dclgbtcount))*100
 ```
+
+Question 5: What percentage of LGBT characters have neutral hair colors? 
+```{r}
+
+
+
+
+``` 
