@@ -148,7 +148,7 @@ marvellgbtcountgoodguy = count(marvel_lgbt_heroes)
 
 Question 3: What's the identity status of LGBT characters? (Here: Identity means secret or public or dual identity according to the data)
 
-Answer: Half of the LGBT characters in the given data have a secret identity while only 37.2% of non-LGBT characters have a secret identity.This question looks at whether LGBT characters have to hide their orientation or not. With so many LGBT individuals struggling with coming out in terms of their gender identity, this is one of our most fascinating questions which will impact greatly the role that these characters have in the comic world. 
+Answer: Half of the LGBT characters in the given data have a secret identity while only 37.2% of non-LGBT characters have a secret identity.While this question doesn't directly indicate what percentage of these characters have their sexual orientation hidden but their overall character's identity which also speaks to their sexual orientation. With so many LGBT individuals struggling with coming out in terms of their gender identity, this is one of our most fascinating questions which will impact greatly the role that these characters have in the comic world. 
 
 ```{r}
 lgbt_secret <- total_lgbt %>% 
