@@ -15,10 +15,16 @@ The deliverable will be this R Markdown notebook and a data folder that you will
 
 **Task** Create a codeblock and load appropriate packages and settings for this assignment.
 
+* A Census API key
+```{r echo=FALSE}
+census_api_key("b6d29189eb33214a9a0b6a811a718e9ec0543cb6")
+```
+
 ## Load libraries and establish settings
 ```{r}
 library(tidyverse)
 library(tidycensus)
+library(tigris)
 library(janitor)
 library(lubridate)
 library(ggrepel)
@@ -31,10 +37,12 @@ library(sf)
 **Q1.**. Write R code that generates some basic descriptive statistics that allows you to describe the applications from your state. This code should produce results that describe the data in different ways: how many applications there are, along with ways to understand the typical and most frequent values for columns you find interesting or newsworthy. You should produce at least five (5) descriptive statistics and write up a summary of the data using them.
 
 **A1.** There are 98,3362 applications in Florida for PPP, according to the dataset.
-Miami-Dade county got the highest number of loans with 2,22,558. 22 loans were recorded with NA as their county name.
+Miami-Dade county got the highest number of loans with 2,22,558. 22 loans were recorded with NA as their county name. 
+Miami-Dade also had the highest number of jobs retained with 10,94,393. About 11 counties got the max loan amount of 1,00,00,000.
 
 ```{r}
 florida_ppp <- read_csv("C:/Users/lolod/Downloads/florida_ppp.csv/florida_ppp.csv")
+florida_ppp <- florida_ppp %>% mutate(city = str_to_title(city))
 
 #The number of PPP loan applications in Florida
 
@@ -51,7 +59,24 @@ florida_ppp %>%
 #Which records had the county name as NA
 florida_ppp %>% filter(is.na(project_county_name))
 
-#s
+#Finding the mean, median, min and max loan amounts
+florida_ppp %>%
+  group_by(project_county_name) %>%
+  summarise(
+    mean_loan_amount = mean(amount),
+    median_loan_amount = median(amount),
+    min_loan_amount = min(amount),
+    max_loan_amount = max(amount)
+  ) %>%
+  arrange(desc(max_loan_amount))
+
+#Number of jobs retained
+
+florida_ppp %>%
+  group_by(project_county_name)%>%
+  summarise(
+    total_jobs = sum(jobs_retained)
+    ) %>% arrange(desc(total_jobs))
 
 ```
 
@@ -60,13 +85,103 @@ florida_ppp %>% filter(is.na(project_county_name))
 
 **Q2.** Write R code that examines geographic patterns for PPP loans in your state, using Census population information to calculate a per-capita figure for the state and counties and zip codes. Then, make a county map using ggplot showing the per-capita data and a zip code map showing the difference from the statewide per-capita figure. Describe the most interesting or newsworthy findings based on your exploration.
 
-**A2.** 
+**A2.** Florida has 4704 loans per 100,000 people. Monroe county has the highest number of loans per capita for a population of 75798.
+
+
+```{r}
+#state
+
+fl_state <-  get_acs(geography = "state", variables = "B01001_001", year = 2019, geometry = TRUE) %>% filter(NAME == "Florida")
+
+fl_ppp_loans <- florida_ppp %>% 
+  summarise(count=n())
+state_per_capita <- fl_state %>% 
+  mutate(
+    per_capita = ((fl_ppp_loans$count / fl_state$estimate)*100000)
+    
+  )
+
+#county
+
+fl_county <- get_acs(geography = "county", variables = c(population = "B01001_001"), 
+              state = "FL", geometry = TRUE)
+
+  fl_county_clean <- fl_county %>% 
+  rename(COUNTY = NAME) %>%
+  mutate(COUNTY = toupper(str_remove_all(COUNTY,", Florida|County"))) %>%
+  mutate(COUNTY = str_trim(COUNTY,side="both")) %>%
+  rename(population = estimate) %>%
+  select(COUNTY, population, geometry)
+  
+  fl_county_loans <- florida_ppp %>% 
+  group_by(project_county_name) %>% 
+  summarise(count_loans = n()) %>% 
+  rename("COUNTY" = "project_county_name")
+  
+ county_per_capita<- merge(fl_county_clean, fl_county_loans, by=c("COUNTY"), all.COUNTY=FALSE) %>% 
+  mutate(loans_per_capita = ((count_loans/population)* 100000)) %>%
+   arrange(desc(loans_per_capita))
+
+ggplot() + 
+  geom_sf(data=county_per_capita, aes(fill=loans_per_capita)) + 
+  theme_minimal()+
+  scale_fill_viridis_b(option="magma",trans = "log") 
+
+#zipcode
+
+fl_zip <- get_acs(geography = "zcta", variables = c(population = "B01001_001"), state = "FL", geometry = TRUE)
+
+florida_ppp <- florida_ppp %>% 
+  mutate(zip5 = str_sub(zip, start=1L, end=5L))
+
+fl_zip_clean <- florida_ppp %>% 
+  mutate(project_zip = str_sub(project_zip, start = 1L, end = 5L)) %>% 
+  rename(GEOID = project_zip) %>% 
+  group_by(GEOID) %>% 
+  summarise(total = n())
+
+zip_per_capita <- fl_zip %>% 
+  left_join(fl_zip_clean, by = "GEOID") %>% 
+  mutate(per_capita = ((total/estimate) *100000),
+         per_capita_diff = state_per_capita$per_capita - per_capita)
+
+ 
+state_map <- counties() %>% 
+  filter(STATEFP == 12)
+ggplot() + 
+  geom_sf(data=state_map, fill = "white")+
+  geom_sf(data=zip_per_capita, aes(fill=per_capita_diff)) + 
+  theme_minimal()+
+  scale_fill_viridis_b(option="magma",trans = "log") 
+
+
+```
+
 
 ## Lender Analysis
 
 **Q3.** Write R code to examine which lenders had the most approved applications in your state (and include summary statistics such as total amount and average loan amount). Generate dataframes that show the number and total amount of all loans and undisbursed loans per lender. For those lenders who had any undisbursed loans, make a graphic showing the relationship between the total amount of loans and the total undisbursed amount. Describe the most noticeable outlier lenders on that graphic below.
 
-**A3.** 
+**A3.** By comparing the total amount of all loans per lender to the total undisbursed loan amounts, we got four lenders which had undisbursed loan amounts in Florida. These four lenders are Blue Ridge Bank, National Association; The Bancorp Bank; Fountainhead SBF LLC and Centennial Bank.
+
+https://datawrapper.dwcdn.net/ytxY2/1/ 
+
+```{r}
+fl_undisbursed_amount <- florida_ppp %>% 
+  select(name, amount, lender, undisbursed_amount, zip5, date_approved) %>%
+  arrange(desc(undisbursed_amount))
+
+lenders_undisbursed <- fl_undisbursed_amount %>% 
+  group_by(lender) %>% 
+  summarise(total_undisbursed_amount = sum(undisbursed_amount),
+            total_amount = sum(amount)) %>%
+  arrange(desc(total_undisbursed_amount)) %>% 
+  head(10)
+
+write_csv(lenders_undisbursed, "fl_lenders_undisbursed.csv")
+
+
+```
 
 
 ## Industry Analysis
@@ -77,10 +192,94 @@ Does the distribution of PPP applications by the top 10 industries (by number of
 
 Create a county-level map showing the differences between the PPP applications and the Census business data for one of the top 10 industry codes. You can do this either using ggplot or Datawrapper (if the latter, publish that map and include the URL below).
 
-**A4.** 
+**A4.** The taxi service industry came in second in top 10 industries which applied for PPP loans in Florida state.
+
+https://datawrapper.dwcdn.net/KNESo/1/
+https://datawrapper.dwcdn.net/Tu47P/1/
+
+```{r}
+cbp_19_co <- read_csv("cbp19co.csv")
+
+florida_cbp <- cbp_19_co %>% 
+  filter(fipstate == 12)
+
+naics_codes <- read_csv("naics_codes.csv")
+
+florida_ppp_naics <- florida_ppp %>% 
+  inner_join(naics_codes, by="naics_code")%>% 
+  select(name, naics_code, title, project_county_name)
+
+county_fips <- read_csv("county_fips.csv") 
+
+fl_county_fips <- county_fips %>% 
+  filter(state == "FL")
+
+florida_ppp_naics_fips <- florida_ppp_naics %>% 
+  inner_join(fl_county_fips, by=c("project_county_name" = "match_county")) %>% 
+  select(-state, -state_code, -state_name, -county_code, -county)
+
+#top ten industries by state
+fl_ppp_naics_fips_state <- florida_ppp_naics_fips %>% 
+  group_by(naics_code) %>% 
+  summarise(total = n()) %>% 
+  arrange(desc(total)) %>% 
+  head(10)
+
+#top ten industries by county
+fl_ppp_naics_fips_county <- florida_ppp_naics_fips %>% 
+  group_by(fips_code) %>% 
+  summarise(total = n()) %>% 
+  arrange(desc(total)) %>% 
+  head(10)
+
+fl_ppp_naics_fips_state <- fl_ppp_naics_fips_state %>% 
+  left_join(naics_codes, by=c("naics_code")) 
+
+florida_cbp <- florida_cbp %>% rename(naics_code=naics)
+
+fl_naics_est<- merge(florida_cbp,fl_ppp_naics_fips_state,by=c("naics_code"), all.naics_code = FALSE)
+
+fl_naics_est<-fl_naics_est %>% 
+  group_by(naics_code) %>% 
+  summarise(
+    est=sum(est)
+  ) %>% mutate(naics_code= as.numeric(naics_code)) 
+
+fl_ppp_naics_fips_state<-fl_ppp_naics_fips_state %>%
+  inner_join(fl_naics_est, by=c("naics_code"))
+#Not all of the PPP applications numbers match the number of businesses.
+
+# Using naics code 485310 for the map because it has the greatest difference between the loan applicatons and the number of businesses.
+fl_naics_485310 <- florida_ppp_naics_fips %>% 
+  filter(naics_code == "485310") %>% 
+  group_by(fips_code) %>% 
+  summarise(total = n())
+
+fl_est_cbp<- florida_cbp %>% 
+  filter(naics_code == "485310")
+
+fl_est_cbp$fips <- paste0(fl_est_cbp$fipstate, fl_est_cbp$fipscty)
+
+fl_est_cbp <- fl_est_cbp %>% 
+  select(fips, est)
+
+
+write_csv(fl_naics_485310, "fl_naics_485310.csv")
+write_csv(fl_est_cbp, "fl_cbp_485310.csv")
+
+```
+
 
 ## Summary
 
 **Q5.** What is the most promising story idea that you have found during this exploration? How would you approach reporting it out and what other information/data would you need to do that? What would be the minimum story you could get from this, and what would be the maximum story?
 
 **A5.**
+```{r}
+
+
+
+
+
+
+```
