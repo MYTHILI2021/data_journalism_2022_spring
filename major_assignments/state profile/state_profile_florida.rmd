@@ -275,12 +275,5 @@ write_csv(fl_est_cbp, "fl_cbp_485310.csv")
 
 **Q5.** What is the most promising story idea that you have found during this exploration? How would you approach reporting it out and what other information/data would you need to do that? What would be the minimum story you could get from this, and what would be the maximum story?
 
-**A5.**
-```{r}
-
-
-
-
-
-
-```
+**A5.** The most promising story idea from the data exploration was about the taxi service industry. The contrast between the number of PPP applications and the number of establishments in that industry is so stark that it calls for more investigation to find the reason behind it. This would be the maximum story from this. 
+The minimum story we would get from this is by juxtaposing the two maps of the statewide per capita loans and county per capita loans. There might be some discrepancies there that might be discoverable with more digging in. 
