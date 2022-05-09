@@ -36,9 +36,9 @@ library(sf)
 
 **Q1.**. Write R code that generates some basic descriptive statistics that allows you to describe the applications from your state. This code should produce results that describe the data in different ways: how many applications there are, along with ways to understand the typical and most frequent values for columns you find interesting or newsworthy. You should produce at least five (5) descriptive statistics and write up a summary of the data using them.
 
-**A1.** There are 98,3362 applications in Florida for PPP, according to the dataset.
-Miami-Dade county got the highest number of loans with 2,22,558. 22 loans were recorded with NA as their county name. 
-Miami-Dade also had the highest number of jobs retained with 10,94,393. About 11 counties got the max loan amount of 1,00,00,000.
+**A1.** There are 983,362 applications in Florida for PPP, according to the dataset.
+Miami-Dade county got the highest number of loans with 222,558. 22 loans were recorded with NA as their county name. 
+Miami-Dade also had the highest number of jobs retained with 1,094,393. About 11 counties got the max loan amount of 10,000,000. According to census reporter, Miami-Dade county has a population of 2,705,528, and therefore, almost half the population had their jobs retained which was interesting.
 
 ```{r}
 florida_ppp <- read_csv("C:/Users/lolod/Downloads/florida_ppp.csv/florida_ppp.csv")
@@ -85,7 +85,8 @@ florida_ppp %>%
 
 **Q2.** Write R code that examines geographic patterns for PPP loans in your state, using Census population information to calculate a per-capita figure for the state and counties and zip codes. Then, make a county map using ggplot showing the per-capita data and a zip code map showing the difference from the statewide per-capita figure. Describe the most interesting or newsworthy findings based on your exploration.
 
-**A2.** Florida has 4704 loans per 100,000 people. Monroe county has the highest number of loans per capita for a population of 75798.
+**A2.** Florida has 4704 loans per 100,000 people. Monroe county has the highest number of loans per capita for a population of 75,798. In the statewide per capita map, most of the state has about 1000 loans per zip code.This seems to be an average high. 
+There's a larger difference between the loans in the north west and south of the state in the state versus county maps.
 
 
 ```{r}
@@ -192,7 +193,7 @@ Does the distribution of PPP applications by the top 10 industries (by number of
 
 Create a county-level map showing the differences between the PPP applications and the Census business data for one of the top 10 industry codes. You can do this either using ggplot or Datawrapper (if the latter, publish that map and include the URL below).
 
-**A4.** The taxi service industry came in second in top 10 industries which applied for PPP loans in Florida state.
+**A4.** The distribution of PPP applications by industries roughly match the number of businesses reported in the census data but only for some industries. One industry that stood out was the taxi service industry. The taxi service industry came in second in top 10 industries which applied for PPP loans in Florida state. But it was also the industry with the least number of establishments. 
 
 https://datawrapper.dwcdn.net/KNESo/1/
 https://datawrapper.dwcdn.net/Tu47P/1/
