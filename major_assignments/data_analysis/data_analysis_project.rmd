@@ -69,9 +69,11 @@ total_characters <- rbind(dc_data, marvel_data)
 
 ```
 
+Defining neutral hair:
+
 ```{r}
 # Create an if/else statement to create new columns that group characters into LGBT or not, and neutral color hair or not.
-dc_data_lgbt_hair <- dc_data_lgbt %>% 
+total_lgbt_hair <- total_lgbt %>% 
   mutate(
     neutral_hair_or_not = case_when(
         hair == 'Black Hair' ~ "NEUTRAL",
@@ -96,7 +98,32 @@ dc_data_lgbt_hair <- dc_data_lgbt %>%
         
       )
   ) 
-marvel_data_lgbt_hair <- marvel_data_lgbt %>% 
+total_nonlgbt_hair <- total_non_lgbt %>% 
+  mutate(
+    neutral_hair_or_not = case_when(
+        hair == 'Black Hair' ~ "NEUTRAL",
+        hair == 'Blond Hair' ~ "NEUTRAL",
+        hair == 'Brown Hair' ~ "NEUTRAL",
+        hair == 'Auburn Hair' ~ "NEUTRAL", 
+        hair == 'Bald' ~ "NEUTRAL",
+        hair == 'Green Hair' ~ "Not",
+        hair == 'Blue Hair' ~ "Not",
+        hair == 'Gold Hair' ~ "Not", 
+        hair == 'Grey Hair' ~ "NEUTRAL",
+        hair == 'Orange Hair' ~ "Not",
+        hair == 'Pink Hair' ~ "Not",
+        hair == 'Platinum Blond Hair' ~ "NEUTRAL", 
+        hair == 'Purple Hair' ~ "Not",
+        hair == 'Red Hair' ~ "Not",
+        hair == 'Reddish Brown Hair' ~ "NEUTRAL",
+        hair == 'Silver Hair' ~ "Not", 
+        hair == 'Strawberry Blond Hair' ~ "NEUTRAL",
+        hair == 'Violet Hair' ~ "Not",
+        hair == 'White Hair' ~ "Not",
+        
+      )
+  ) 
+total_character_hair <- total_characters %>% 
   mutate(
     neutral_hair_or_not = case_when(
         hair == 'Black Hair' ~ "NEUTRAL",
